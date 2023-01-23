@@ -1,3 +1,4 @@
+import { Component } from 'react';
 import {
   Searchbar,
   SearchForm,
@@ -5,21 +6,39 @@ import {
   SearchFormInput,
 } from './Searchbar.styled';
 import { FaSearch } from 'react-icons/fa';
-export const SearchBar = () => {
-  return (
-    <Searchbar>
-      <SearchForm>
-        <SearchFormButton type="submit">
-          <FaSearch />
-        </SearchFormButton>
 
-        <SearchFormInput
-          type="text"
-          autocomplete="off"
-          autofocus
-          placeholder="Search images and photos"
-        />
-      </SearchForm>
-    </Searchbar>
-  );
-};
+export class SearchBar extends Component {
+  state = {
+    text: '',
+  };
+  onSubmit = evt => {
+    evt.preventDefault();
+    const { text } = this.state;
+    this.props.onSubmit(text);
+    this.setState({
+      text: '',
+    });
+    evt.target.reset();
+  };
+  onChangeInput = evt => {
+    this.setState({ text: evt.target.value });
+  };
+  render() {
+    return (
+      <Searchbar>
+        <SearchForm onSubmit={this.onSubmit}>
+          <SearchFormButton type="submit">
+            <FaSearch />
+          </SearchFormButton>
+          <SearchFormInput
+            type="text"
+            autocomplete="off"
+            autoFocus
+            placeholder="Search images and photos"
+            onChange={this.onChangeInput}
+          />
+        </SearchForm>
+      </Searchbar>
+    );
+  }
+}
