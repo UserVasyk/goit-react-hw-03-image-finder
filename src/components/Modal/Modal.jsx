@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 import { ModalBox, Overlay } from './Modal.styled';
 export class Modal extends Component {
   componentDidMount() {
@@ -28,3 +29,6 @@ export class Modal extends Component {
     );
   }
 }
+Modal.propTypes = {
+  largeImageURL: PropTypes.string.isRequired,
+};

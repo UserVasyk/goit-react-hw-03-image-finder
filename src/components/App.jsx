@@ -32,7 +32,7 @@ export class App extends Component {
       })
       .catch(error => this.setState({ status: 'rejected' }));
   };
-  //HTTP ЗАПИТ КАРТИНОК ПО КЛІКУ НА BUTTON
+  //HTTP ЗАПИТ ПО КЛІКУ НА BUTTON
   onButtonHandleClick = () => {
     this.setState({ status: 'pending' });
     this.setState(prevState => ({
@@ -46,9 +46,9 @@ export class App extends Component {
         if (data.hits.length < 12) {
           return Promise.reject(new Error());
         }
-        this.setState(prevState => ({
+        this.setState({
           status: 'resolved',
-        }));
+        });
       })
       .catch(error => {
         this.setState({ status: 'rejected' });
@@ -56,15 +56,16 @@ export class App extends Component {
   };
   //РЕНДЕР ПО СТЕЙТ МАШИНІ
   render() {
-    const { status } = this.state;
+    const { status, massiveOfImages } = this.state;
+    const { onSubmit, onButtonHandleClick } = this;
     return (
       <AppBox>
-        <SearchBar onSubmit={this.onSubmit} />;
-        <ImageGallery images={this.state.massiveOfImages} />
+        <SearchBar onSubmit={onSubmit} />;
+        <ImageGallery images={massiveOfImages} />
         {status === 'pending' && <Loader />}
         {status === 'resolved' && (
           <>
-            <Button onButtonHandleClick={this.onButtonHandleClick} />
+            <Button onButtonHandleClick={onButtonHandleClick} />
           </>
         )}
         {status === 'rejected' &&
