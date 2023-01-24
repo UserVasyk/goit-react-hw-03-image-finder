@@ -12,9 +12,7 @@ export class ImageGalleryItem extends Component {
   };
   onOpenModal = image => {
     this.setState({ image: image });
-    console.log(this.state.isActive);
     this.setState(prevState => ({ isActive: !prevState.isActive }));
-    console.log(this.state.isActive);
   };
   render() {
     return (
