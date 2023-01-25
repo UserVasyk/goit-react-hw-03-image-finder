@@ -13,10 +13,11 @@ export class App extends Component {
     page: 0,
     text: '',
     status: 'idle',
+    query: true,
   };
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.page !== this.state.page) {
+    if (prevState.query !== this.state.query) {
       this.setState({ status: 'pending' });
       fetchImages(this.state.text, this.state.page)
         .then(({ data }) => {
@@ -35,18 +36,21 @@ export class App extends Component {
         });
     }
   }
+
   onSubmit = text => {
-    this.setState({
+    this.setState(prevState => ({
       page: 1,
       text: text,
       massiveOfImages: [],
-    });
+      query: !prevState.query,
+    }));
     window.scroll({ top: 0 });
   };
 
   onButtonHandleClick = () => {
     this.setState(prevState => ({
       page: prevState.page + 1,
+      query: !prevState.query,
     }));
   };
   //РЕНДЕР ПО СТЕЙТ МАШИНІ
