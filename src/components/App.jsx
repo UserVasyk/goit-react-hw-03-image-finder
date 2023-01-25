@@ -10,49 +10,44 @@ import { AppBox } from './App.styled';
 export class App extends Component {
   state = {
     massiveOfImages: [],
-    page: 1,
+    page: 0,
     text: '',
     status: 'idle',
   };
 
-  //HTTP ЗАПИТ ПО ПОШУКУ
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.page !== this.state.page) {
+      this.setState({ status: 'pending' });
+      fetchImages(this.state.text, this.state.page)
+        .then(({ data }) => {
+          this.setState(prevState => ({
+            massiveOfImages: [...prevState.massiveOfImages, ...data.hits],
+          }));
+          if (data.hits.length < 12) {
+            return Promise.reject(new Error());
+          }
+          this.setState({
+            status: 'resolved',
+          });
+        })
+        .catch(error => {
+          this.setState({ status: 'rejected' });
+        });
+    }
+  }
   onSubmit = text => {
-    this.setState({ status: 'pending' });
+    this.setState({
+      page: 1,
+      text: text,
+      massiveOfImages: [],
+    });
     window.scroll({ top: 0 });
-    this.setState({ page: 2, text: text });
-    fetchImages(text, 1)
-      .then(({ data }) => {
-        this.setState({ massiveOfImages: data.hits });
-
-        if (data.total <= 12) {
-          return Promise.reject(new Error());
-        }
-        Notiflix.Notify.success(`Hooray! We found ${data.total} images.`);
-        this.setState({ status: 'resolved' });
-      })
-      .catch(error => this.setState({ status: 'rejected' }));
   };
-  //HTTP ЗАПИТ ПО КЛІКУ НА BUTTON
+
   onButtonHandleClick = () => {
-    this.setState({ status: 'pending' });
     this.setState(prevState => ({
       page: prevState.page + 1,
     }));
-    fetchImages(this.state.text, this.state.page)
-      .then(({ data }) => {
-        this.setState(prevState => ({
-          massiveOfImages: [...prevState.massiveOfImages, ...data.hits],
-        }));
-        if (data.hits.length < 12) {
-          return Promise.reject(new Error());
-        }
-        this.setState({
-          status: 'resolved',
-        });
-      })
-      .catch(error => {
-        this.setState({ status: 'rejected' });
-      });
   };
   //РЕНДЕР ПО СТЕЙТ МАШИНІ
   render() {
