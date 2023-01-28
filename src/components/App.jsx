@@ -9,31 +9,29 @@ import { AppBox } from './App.styled';
 
 export class App extends Component {
   state = {
-    massiveOfImages: [],
+    images: [],
     page: 0,
     text: '',
     status: 'idle',
-    query: true,
   };
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.query !== this.state.query) {
+    if (
+      prevState.page !== this.state.page ||
+      prevState.text !== this.state.text
+    ) {
       this.setState({ status: 'pending' });
-      fetchImages(this.state.text, this.state.page)
-        .then(({ data }) => {
-          this.setState(prevState => ({
-            massiveOfImages: [...prevState.massiveOfImages, ...data.hits],
-          }));
-          if (data.hits.length < 12) {
-            return Promise.reject(new Error());
-          }
-          this.setState({
-            status: 'resolved',
-          });
-        })
-        .catch(error => {
-          this.setState({ status: 'rejected' });
+      fetchImages(this.state.text, this.state.page).then(({ data }) => {
+        this.setState(prevState => ({
+          images: [...prevState.images, ...data.hits],
+        }));
+        if (this.state.page > data.total / 12) {
+          return this.setState({ status: 'rejected' });
+        }
+        this.setState({
+          status: 'resolved',
         });
+      });
     }
   }
 
@@ -41,8 +39,7 @@ export class App extends Component {
     this.setState(prevState => ({
       page: 1,
       text: text,
-      massiveOfImages: [],
-      query: !prevState.query,
+      images: [],
     }));
     window.scroll({ top: 0 });
   };
@@ -50,17 +47,16 @@ export class App extends Component {
   onButtonHandleClick = () => {
     this.setState(prevState => ({
       page: prevState.page + 1,
-      query: !prevState.query,
     }));
   };
   //РЕНДЕР ПО СТЕЙТ МАШИНІ
   render() {
-    const { status, massiveOfImages } = this.state;
+    const { status, images } = this.state;
     const { onSubmit, onButtonHandleClick } = this;
     return (
       <AppBox>
         <SearchBar onSubmit={onSubmit} />;
-        <ImageGallery images={massiveOfImages} />
+        <ImageGallery images={images} />
         {status === 'pending' && <Loader />}
         {status === 'resolved' && (
           <>
