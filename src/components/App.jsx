@@ -12,7 +12,8 @@ export class App extends Component {
     images: [],
     page: 0,
     text: '',
-    status: 'idle',
+    loading: false,
+    showBtn: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -20,27 +21,33 @@ export class App extends Component {
       prevState.page !== this.state.page ||
       prevState.text !== this.state.text
     ) {
-      this.setState({ status: 'pending' });
-      fetchImages(this.state.text, this.state.page).then(({ data }) => {
-        this.setState(prevState => ({
-          images: [...prevState.images, ...data.hits],
-        }));
-        if (this.state.page > data.total / 12) {
-          return this.setState({ status: 'rejected' });
-        }
-        this.setState({
-          status: 'resolved',
-        });
-      });
+      this.setState({ loading: true, showBtn: false });
+      fetchImages(this.state.text, this.state.page)
+        .then(({ data }) => {
+          this.setState(prevState => ({
+            images: [...prevState.images, ...data.hits],
+            loading: false,
+          }));
+          if (this.state.page > data.total / 12) {
+            Notiflix.Notify.warning(
+              "We're sorry, but you've reached the end of search results."
+            );
+            return this.setState({ showBtn: false });
+          }
+          this.setState({
+            showBtn: true,
+          });
+        })
+        .catch(error => console.error(error));
     }
   }
 
   onSubmit = text => {
-    this.setState(prevState => ({
+    this.setState({
       page: 1,
       text: text,
       images: [],
-    }));
+    });
     window.scroll({ top: 0 });
   };
 
@@ -49,24 +56,15 @@ export class App extends Component {
       page: prevState.page + 1,
     }));
   };
-  //РЕНДЕР ПО СТЕЙТ МАШИНІ
   render() {
-    const { status, images } = this.state;
+    const { images, showBtn, loading } = this.state;
     const { onSubmit, onButtonHandleClick } = this;
     return (
       <AppBox>
         <SearchBar onSubmit={onSubmit} />;
         <ImageGallery images={images} />
-        {status === 'pending' && <Loader />}
-        {status === 'resolved' && (
-          <>
-            <Button onButtonHandleClick={onButtonHandleClick} />
-          </>
-        )}
-        {status === 'rejected' &&
-          Notiflix.Notify.warning(
-            "We're sorry, but you've reached the end of search results."
-          )}
+        {loading && <Loader />}
+        {showBtn && <Button onButtonHandleClick={onButtonHandleClick} />}
       </AppBox>
     );
   }
